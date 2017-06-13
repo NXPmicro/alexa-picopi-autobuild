@@ -1,0 +1,89 @@
+From e902a8a9423d0eb47460b78ff0014f1f930dce0e Mon Sep 17 00:00:00 2001
+From: Alejandro Sierra <alejandro.sierra@nxp.com>
+Date: Wed, 31 May 2017 01:49:54 +0000
+Subject: [PATCH] Build sensory only configuration
+
+This will disable kitt-ai and GPIO engines with all their dependencies.
+Leaving only sensory as engine.
+
+Signed-off-by: Alejandro Sierra <alejandro.sierra@nxp.com>
+---
+ samples/wakeWordAgent/src/CMakeLists.txt            | 17 +++--------------
+ samples/wakeWordAgent/src/WakeWordEngineFactory.cpp |  7 -------
+ 2 files changed, 3 insertions(+), 21 deletions(-)
+
+diff --git a/samples/wakeWordAgent/src/CMakeLists.txt b/samples/wakeWordAgent/src/CMakeLists.txt
+index 8497211..b2a29b0 100644
+--- a/samples/wakeWordAgent/src/CMakeLists.txt
++++ b/samples/wakeWordAgent/src/CMakeLists.txt
+@@ -13,18 +13,14 @@ set( WAKE_WORD_AGENT_SOURCE
+         IPCInterface.cpp
+         Logger.cpp
+         WakeWordException.cpp
+-        KittAiSnowboyWakeWordEngine.cpp
+         PortAudioWrapper.cpp
+-        SensoryWakeWordEngine.cpp
+-        GPIOWakeWordEngine.cpp )
++        SensoryWakeWordEngine.cpp )
++        
+ 
+ set( WAKE_WORD_AGENT_LIBS
+-        snowboy-detect
+-        blas
+         portaudio
+         asound
+-        sensory
+-        wiringPi )
++        sensory )
+ 
+ find_package( Threads )
+ set( CMAKE_THREAD_PREFER_PTHREAD TRUE )
+@@ -38,10 +34,6 @@ target_include_directories( wakeWordAgent PRIVATE ${CMAKE_SOURCE_DIR}/../ext/inc
+ target_link_libraries( wakeWordAgent ${WAKE_WORD_AGENT_LIBS} )
+ target_link_libraries( wakeWordAgent ${CMAKE_THREAD_LIBS_INIT} )
+ 
+-add_library( snowboy-detect STATIC IMPORTED )
+-set_target_properties( snowboy-detect PROPERTIES IMPORTED_LOCATION
+-  ${CMAKE_SOURCE_DIR}/../ext/lib/libsnowboy-detect.a )
+-
+ add_library( portaudio STATIC IMPORTED )
+ set_target_properties( portaudio PROPERTIES IMPORTED_LOCATION
+   ${CMAKE_SOURCE_DIR}/../ext/lib/libportaudio.a )
+@@ -50,6 +42,3 @@ add_library( sensory STATIC IMPORTED )
+ set_target_properties( sensory PROPERTIES IMPORTED_LOCATION
+   ${CMAKE_SOURCE_DIR}/../ext/lib/libsnsr.a )
+ 
+-add_library( blas SHARED IMPORTED )
+-set_target_properties( blas PROPERTIES IMPORTED_LOCATION
+-  ${CMAKE_SOURCE_DIR}/../ext/lib/libblas.so.3 )
+diff --git a/samples/wakeWordAgent/src/WakeWordEngineFactory.cpp b/samples/wakeWordAgent/src/WakeWordEngineFactory.cpp
+index 38ea777..073f065 100644
+--- a/samples/wakeWordAgent/src/WakeWordEngineFactory.cpp
++++ b/samples/wakeWordAgent/src/WakeWordEngineFactory.cpp
+@@ -14,7 +14,6 @@
+ #include "WakeWordEngineFactory.h"
+ #include "Logger.h"
+ #include "WakeWordUtils.h"
+-#include "KittAiSnowboyWakeWordEngine.h"
+ #include "SensoryWakeWordEngine.h"
+ #include "GPIOWakeWordEngine.h"
+ 
+@@ -29,15 +28,9 @@ std::unique_ptr<WakeWordEngine> createEngine(
+         EngineType engineType) {
+ 
+   switch(engineType) {
+-    case EngineType::KITT_AI_SNOWBOY_ENGINE:
+-      log(Logger::DEBUG, "WakeWordEngineFactory: creating Kitt-Ai Engine");
+-      return make_unique<KittAiSnowboyWakeWordEngine>(interface);
+     case EngineType::SENSORY_ENGINE:
+       log(Logger::DEBUG, "WakeWordEngineFactory: creating Sensory Engine");
+       return make_unique<SensoryWakeWordEngine>(interface);
+-    case EngineType::GPIO_ENGINE:
+-      log(Logger::DEBUG, "WakeWordEngineFactory: creating GPIO Engine");
+-      return make_unique<GPIOWakeWordEngine>(interface);
+     default:
+       log(Logger::ERROR, "WakeWordEngineFactory: unhandled switch case");
+       return nullptr;
+-- 
+2.5.0
+
