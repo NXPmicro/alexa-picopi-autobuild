@@ -360,12 +360,12 @@ Samples_Loc=$Origin/samples
 Java_Client_Loc=$Samples_Loc/javaclient
 Wake_Word_Agent_Loc=$Samples_Loc/wakeWordAgent
 Companion_Service_Loc=$Samples_Loc/companionService
-Kitt_Ai_Loc=$Wake_Word_Agent_Loc/kitt_ai
+Port_Audio_Loc=$Wake_Word_Agent_Loc/portaudio
 Sensory_Loc=$Wake_Word_Agent_Loc/sensory
 External_Loc=$Wake_Word_Agent_Loc/ext
 Locale="en-US"
 
-mkdir $Kitt_Ai_Loc
+mkdir $Port_Audio_Loc
 mkdir $Sensory_Loc
 mkdir $External_Loc
 
@@ -400,18 +400,34 @@ if [ "$USER_RESPONSE" = "$NO_ANSWER" ]; then
   Wake_Word_Detection_Enabled="false"
 fi
 
-echo "========== Getting the code for Kitt-Ai ==========="
-cd $Kitt_Ai_Loc
-git clone https://github.com/Kitt-AI/snowboy.git
-
 echo "========== Getting the code for Sensory ==========="
 cd $Sensory_Loc
 git clone https://github.com/Sensory/alexa-rpi.git
 
-cd $Origin
 echo "========== Downloading and Building Port Audio Library needed for the wake word agent =========="
-cd $Kitt_Ai_Loc/snowboy/examples/C++
-bash ./install_portaudio.sh
+cd $Port_Audio_Loc
+if [ ! -e pa_stable_v190600_20161030.tgz ]; then
+  wget -T 10 -t 3 \
+    http://www.portaudio.com/archives/pa_stable_v190600_20161030.tgz || exit 1;
+fi
+
+tar -xovzf pa_stable_v190600_20161030.tgz || exit 1
+
+cd portaudio
+
+MACOS=`uname 2>/dev/null | grep Darwin`
+if [ -z "$MACOS" ]; then
+  ./configure --without-jack --without-oss \
+    --with-alsa --prefix=`pwd`/install --with-pic || exit 1;
+  sed -i '40s:src/common/pa_ringbuffer.o::g' Makefile
+  sed -i '40s:$: src/common/pa_ringbuffer.o:' Makefile
+else
+  # People may have changed OSX's default configuration -- we use clang++.
+  CC=clang CXX=clang++ ./configure --prefix=`pwd`/install --with-pic
+fi
+
+make
+make install
 ldconfig
 
 echo "========== Generating ssl.cnf =========="
@@ -458,10 +474,10 @@ mkdir $External_Loc/include
 mkdir $External_Loc/lib
 mkdir $External_Loc/resources
 
-cp $Kitt_Ai_Loc/snowboy/examples/C++/portaudio/install/include/portaudio.h $External_Loc/include/portaudio.h
-cp $Kitt_Ai_Loc/snowboy/examples/C++/portaudio/install/include/pa_ringbuffer.h $External_Loc/include/pa_ringbuffer.h
-cp $Kitt_Ai_Loc/snowboy/examples/C++/portaudio/install/include/pa_util.h $External_Loc/include/pa_util.h
-cp $Kitt_Ai_Loc/snowboy/examples/C++/portaudio/install/lib/libportaudio.a $External_Loc/lib/libportaudio.a
+cp $Port_Audio_Loc/portaudio/install/include/portaudio.h $External_Loc/include/portaudio.h
+cp $Port_Audio_Loc/portaudio/src/common/pa_ringbuffer.h $External_Loc/include/pa_ringbuffer.h
+cp $Port_Audio_Loc/portaudio/src/common/pa_util.h $External_Loc/include/pa_util.h
+cp $Port_Audio_Loc/portaudio/install/lib/libportaudio.a $External_Loc/lib/libportaudio.a
 
 $Sensory_Loc/alexa-rpi/bin/sdk-license file $Sensory_Loc/alexa-rpi/config/license-key.txt $Sensory_Loc/alexa-rpi/lib/libsnsr.a $Sensory_Loc/alexa-rpi/models/spot-alexa-rpi-20500.snsr $Sensory_Loc/alexa-rpi/models/spot-alexa-rpi-21000.snsr $Sensory_Loc/alexa-rpi/models/spot-alexa-rpi-31000.snsr
 cp $Sensory_Loc/alexa-rpi/include/snsr.h $External_Loc/include/snsr.h
