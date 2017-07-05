@@ -14,5 +14,5 @@ When finished, you'll have a fully functioning Amazon AVS prototype that uses th
 
 ## Get started
 
-Follow the Quick Start Guide on the following link -
+Follow the Quick Start Guide on the next link -
 [Arrow kit NXP PicoPi + Conexant 2-Mic Development kit](../../wiki)
