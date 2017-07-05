@@ -1,4 +1,5 @@
 Instructions to run the build alexa-avs sample application
+===========================================================
 1.- Download the image alexa-conexant-picopi-imx7.sdcard into the pico-pi board
 2.- Boot Linux on the pico-pi board
 3.- Connect your board to the internet. Could be by using ethernet or wireless connection
