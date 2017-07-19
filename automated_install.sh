@@ -402,7 +402,7 @@ fi
 
 echo "========== Getting the code for Sensory ==========="
 cd $Sensory_Loc
-git clone https://github.com/Sensory/alexa-rpi.git
+git clone https://github.com/Sensory/alexa-rpi.git sensory-alexa
 
 echo "========== Downloading and Building Port Audio Library needed for the wake word agent =========="
 cd $Port_Audio_Loc
@@ -479,10 +479,10 @@ cp $Port_Audio_Loc/portaudio/src/common/pa_ringbuffer.h $External_Loc/include/pa
 cp $Port_Audio_Loc/portaudio/src/common/pa_util.h $External_Loc/include/pa_util.h
 cp $Port_Audio_Loc/portaudio/install/lib/libportaudio.a $External_Loc/lib/libportaudio.a
 
-$Sensory_Loc/alexa-rpi/bin/sdk-license file $Sensory_Loc/alexa-rpi/config/license-key.txt $Sensory_Loc/alexa-rpi/lib/libsnsr.a $Sensory_Loc/alexa-rpi/models/spot-alexa-rpi-20500.snsr $Sensory_Loc/alexa-rpi/models/spot-alexa-rpi-21000.snsr $Sensory_Loc/alexa-rpi/models/spot-alexa-rpi-31000.snsr
-cp $Sensory_Loc/alexa-rpi/include/snsr.h $External_Loc/include/snsr.h
-cp $Sensory_Loc/alexa-rpi/lib/libsnsr.a $External_Loc/lib/libsnsr.a
-cp $Sensory_Loc/alexa-rpi/models/spot-alexa-rpi-31000.snsr $External_Loc/resources/spot-alexa-rpi.snsr
+$Sensory_Loc/sensory-alexa/bin/sdk-license file $Sensory_Loc/sensory-alexa/config/license-key.txt $Sensory_Loc/sensory-alexa/lib/libsnsr.a $Sensory_Loc/sensory-alexa/models/spot-alexa-rpi-20500.snsr $Sensory_Loc/sensory-alexa/models/spot-alexa-rpi-21000.snsr $Sensory_Loc/sensory-alexa/models/spot-alexa-rpi-31000.snsr
+cp $Sensory_Loc/sensory-alexa/include/snsr.h $External_Loc/include/snsr.h
+cp $Sensory_Loc/sensory-alexa/lib/libsnsr.a $External_Loc/lib/libsnsr.a
+cp $Sensory_Loc/sensory-alexa/models/spot-alexa-rpi-31000.snsr $External_Loc/resources/spot-alexa-rpi.snsr
 
 echo "========== Applying Wake Word Agent patch to build only for Sensory =========="
 cd $Wake_Word_Agent_Loc/src
